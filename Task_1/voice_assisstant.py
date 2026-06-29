@@ -1,26 +1,25 @@
 import speech_recognition as sr
-import pyttsx3
+import win32com.client
 import datetime
 import webbrowser
 
-engine = pyttsx3.init()
 
-engine.setProperty('rate', 170)
+speaker = win32com.client.Dispatch("SAPI.SpVoice")
 
+speaker.Rate = 1 
 
 def speak(text):
     print("Assistant:", text)
-    engine.say(text)
-    engine.runAndWait()
+    speaker.Speak(text)
 
 
 def listen():
     recognizer = sr.Recognizer()
 
-    with sr.Microphone() as source:
-        print("\nListening...")
-        speak("Listening")
+    print("\nListening...")
+    speak("Listening")
 
+    with sr.Microphone() as source:
         recognizer.adjust_for_ambient_noise(source, duration=1)
 
         try:
@@ -99,13 +98,27 @@ def process_command(command):
 def main():
     speak("Voice Assistant Started")
 
-    running = True
+    while True:
 
-    while running:
         command = listen()
 
         if command != "":
-            running = process_command(command)
+            continue_running = process_command(command)
+
+            if not continue_running:
+                break
+
+        print("\nEnter 1 to continue or 0 to exit:")
+        choice = input("Choice: ")
+
+        while choice not in ["0", "1"]:
+            choice = input("Please enter 1 or 0: ")
+
+        if choice == "0":
+            speak("Goodbye. Have a nice day.")
+            break
+
+        speak("Ready for the next command")
 
 
 if __name__ == "__main__":
